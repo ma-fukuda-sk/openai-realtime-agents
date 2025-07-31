@@ -1,132 +1,132 @@
 export const exampleAccountInfo = {
   accountId: "NT-123456",
-  name: "Alex Johnson",
-  phone: "+1-206-135-1246",
-  email: "alex.johnson@email.com",
-  plan: "Unlimited Plus",
-  balanceDue: "$42.17",
+  name: "田中太郎",
+  phone: "+81-3-1234-5678",
+  email: "tanaka.taro@email.com",
+  plan: "無制限プラス",
+  balanceDue: "¥4,217",
   lastBillDate: "2024-05-15",
   lastPaymentDate: "2024-05-20",
-  lastPaymentAmount: "$42.17",
-  status: "Active",
+  lastPaymentAmount: "¥4,217",
+  status: "アクティブ",
   address: {
-    street: "1234 Pine St",
-    city: "Seattle",
-    state: "WA",
-    zip: "98101"
+    street: "東京都渋谷区松濤1-2-3",
+    city: "渋谷",
+    state: "東京都",
+    zip: "150-0046"
   },
   lastBillDetails: {
-    basePlan: "$30.00",
-    internationalCalls: "$8.00",
-    dataOverage: "$4.00",
-    taxesAndFees: "$0.17",
-    notes: "Higher than usual due to international calls and data overage."
+    basePlan: "¥3,000",
+    internationalCalls: "¥800",
+    dataOverage: "¥400",
+    taxesAndFees: "¥17",
+    notes: "国際通話とデータ超過により通常より高額になっています。"
   }
 };
 
 export const examplePolicyDocs = [
   {
     id: "ID-010",
-    name: "Family Plan Policy",
-    topic: "family plan options",
+    name: "ファミリープラン規約",
+    topic: "ファミリープランオプション",
     content:
-      "The family plan allows up to 5 lines per account. All lines share a single data pool. Each additional line after the first receives a 10% discount. All lines must be on the same account.",
+      "ファミリープランでは1つのアカウントにつき最大5回線まで利用可能です。すべての回線で1つのデータプールを共有します。1回線目以降の追加回線は10%割引が適用されます。すべての回線は同一アカウント内である必要があります。",
   },
   {
     id: "ID-020",
-    name: "Promotions and Discounts Policy",
-    topic: "promotions and discounts",
+    name: "キャンペーン・割引規約",
+    topic: "キャンペーンと割引",
     content:
-      "The Summer Unlimited Data Sale provides a 20% discount on the Unlimited Plus plan for the first 6 months for new activations completed by July 31, 2024. The Refer-a-Friend Bonus provides a $50 bill credit to both the referring customer and the new customer after 60 days of active service, for activations by August 31, 2024. A maximum of 5 referral credits may be earned per account. Discounts cannot be combined with other offers.",
+      "夏の無制限データセールでは、2024年7月31日までに完了した新規契約に対して無制限プラスプランを最初の6ヶ月間20%割引で提供します。友達紹介ボーナスでは、2024年8月31日までの契約に対して、サービス開始から60日後に紹介者と被紹介者の両方に¥5,000の請求書クレジットを提供します。1つのアカウントで獲得できる紹介クレジットは最大5回までです。割引は他のオファーとの併用はできません。",
   },
   {
     id: "ID-030",
-    name: "International Plans Policy",
-    topic: "international plans",
+    name: "国際プラン規約",
+    topic: "国際プラン",
     content:
-      "International plans are available and include discounted calling, texting, and data usage in over 100 countries.",
+      "国際プランが利用可能で、100以上の国での通話、テキスト、データ使用に割引料金が適用されます。",
   },
   {
     id: "ID-040",
-    name: "Handset Offers Policy",
-    topic: "new handsets",
+    name: "端末キャンペーン規約",
+    topic: "新しい端末",
     content:
-      "Handsets from brands such as iPhone and Google are available. The iPhone 16 is $200 and the Google Pixel 8 is available for $0, both with an additional 18-month commitment. These offers are valid while supplies last and may require eligible plans or trade-ins. For more details, visit one of our stores.",
+      "iPhoneやGoogleなどのブランドの端末が利用可能です。iPhone 16は¥20,000、Google Pixel 8は追加の18ヶ月契約により¥0で提供しています。これらのオファーは在庫がある限り有効で、対象プランや下取りが必要な場合があります。詳細については店舗にお越しください。",
   },
 ];
 
 export const exampleStoreLocations = [
-  // NorCal
+  // 関東
   {
-    name: "NewTelco San Francisco Downtown Store",
-    address: "1 Market St, San Francisco, CA",
-    zip_code: "94105",
-    phone: "(415) 555-1001",
-    hours: "Mon-Sat 10am-7pm, Sun 11am-5pm"
+    name: "ニューテルコ東京駅前店",
+    address: "東京都千代田区丸の内1-1-1",
+    zip_code: "100-0005",
+    phone: "(03) 1234-5678",
+    hours: "月-土 10:00-19:00, 日 11:00-17:00"
   },
   {
-    name: "NewTelco San Jose Valley Fair Store",
-    address: "2855 Stevens Creek Blvd, Santa Clara, CA",
-    zip_code: "95050",
-    phone: "(408) 555-2002",
-    hours: "Mon-Sat 10am-8pm, Sun 11am-6pm"
+    name: "ニューテルコ新宿東口店",
+    address: "東京都新宿区新宿3-38-1",
+    zip_code: "160-0022",
+    phone: "(03) 2345-6789",
+    hours: "月-土 10:00-20:00, 日 11:00-18:00"
   },
   {
-    name: "NewTelco Sacramento Midtown Store",
-    address: "1801 L St, Sacramento, CA",
-    zip_code: "95811",
-    phone: "(916) 555-3003",
-    hours: "Mon-Sat 10am-7pm, Sun 12pm-5pm"
+    name: "ニューテルコ横浜みなとみらい店",
+    address: "神奈川県横浜市西区みなとみらい2-2-1",
+    zip_code: "220-0012",
+    phone: "(045) 3456-7890",
+    hours: "月-土 10:00-19:00, 日 12:00-17:00"
   },
-  // SoCal
+  // 関西
   {
-    name: "NewTelco Los Angeles Hollywood Store",
-    address: "6801 Hollywood Blvd, Los Angeles, CA",
-    zip_code: "90028",
-    phone: "(323) 555-4004",
-    hours: "Mon-Sat 10am-9pm, Sun 11am-7pm"
-  },
-  {
-    name: "NewTelco San Diego Gaslamp Store",
-    address: "555 5th Ave, San Diego, CA",
-    zip_code: "92101",
-    phone: "(619) 555-5005",
-    hours: "Mon-Sat 10am-8pm, Sun 11am-6pm"
+    name: "ニューテルコ大阪梅田店",
+    address: "大阪府大阪市北区梅田1-1-3",
+    zip_code: "530-0001",
+    phone: "(06) 4567-8901",
+    hours: "月-土 10:00-21:00, 日 11:00-19:00"
   },
   {
-    name: "NewTelco Irvine Spectrum Store",
-    address: "670 Spectrum Center Dr, Irvine, CA",
-    zip_code: "92618",
-    phone: "(949) 555-6006",
-    hours: "Mon-Sat 10am-8pm, Sun 11am-6pm"
-  },
-  // East Coast
-  {
-    name: "NewTelco New York City Midtown Store",
-    address: "350 5th Ave, New York, NY",
-    zip_code: "10118",
-    phone: "(212) 555-7007",
-    hours: "Mon-Sat 9am-8pm, Sun 10am-6pm"
+    name: "ニューテルコ京都四条店",
+    address: "京都府京都市下京区四条通烏丸東入長刀鉾町8",
+    zip_code: "600-8008",
+    phone: "(075) 5678-9012",
+    hours: "月-土 10:00-20:00, 日 11:00-18:00"
   },
   {
-    name: "NewTelco Boston Back Bay Store",
-    address: "800 Boylston St, Boston, MA",
-    zip_code: "02199",
-    phone: "(617) 555-8008",
-    hours: "Mon-Sat 10am-7pm, Sun 12pm-6pm"
+    name: "ニューテルコ神戸三宮店",
+    address: "兵庫県神戸市中央区三宮町1-5-1",
+    zip_code: "650-0021",
+    phone: "(078) 6789-0123",
+    hours: "月-土 10:00-20:00, 日 11:00-18:00"
+  },
+  // 中部
+  {
+    name: "ニューテルコ名古屋栄店",
+    address: "愛知県名古屋市中区栄3-4-5",
+    zip_code: "460-0008",
+    phone: "(052) 7890-1234",
+    hours: "月-土 9:00-20:00, 日 10:00-18:00"
   },
   {
-    name: "NewTelco Washington DC Georgetown Store",
-    address: "1234 Wisconsin Ave NW, Washington, DC",
-    zip_code: "20007",
-    phone: "(202) 555-9009",
-    hours: "Mon-Sat 10am-7pm, Sun 12pm-5pm"
+    name: "ニューテルコ金沢駅前店",
+    address: "石川県金沢市木ノ新保町1-1",
+    zip_code: "920-0858",
+    phone: "(076) 8901-2345",
+    hours: "月-土 10:00-19:00, 日 12:00-18:00"
   },
   {
-    name: "NewTelco Miami Beach Store",
-    address: "1601 Collins Ave, Miami Beach, FL",
-    zip_code: "33139",
-    phone: "(305) 555-1010",
-    hours: "Mon-Sat 10am-8pm, Sun 11am-6pm"
+    name: "ニューテルコ静岡駅南店",
+    address: "静岡県静岡市駿河区南町14-25",
+    zip_code: "422-8067",
+    phone: "(054) 9012-3456",
+    hours: "月-土 10:00-19:00, 日 12:00-17:00"
+  },
+  {
+    name: "ニューテルコ福岡天神店",
+    address: "福岡県福岡市中央区天神1-11-17",
+    zip_code: "810-0001",
+    phone: "(092) 0123-4567",
+    hours: "月-土 10:00-20:00, 日 11:00-18:00"
   }
 ];

@@ -441,20 +441,20 @@ function App() {
         >
           <div>
             <Image
-              src="/openai-logomark.svg"
-              alt="OpenAI Logo"
-              width={20}
-              height={20}
+              src="/logo.png"
+              alt="Logo"
+              width={48}
+              height={48}
               className="mr-2"
             />
           </div>
           <div>
-            Realtime API <span className="text-gray-500">Agents</span>
+            すかいらーく <span className="text-gray-500">宅配</span>
           </div>
         </div>
         <div className="flex items-center">
           <label className="flex items-center text-base gap-1 mr-2 font-medium">
-            Scenario
+            担当者
           </label>
           <div className="relative inline-block">
             <select

@@ -2,44 +2,43 @@ import { useRef } from "react";
 import { convertWebMBlobToWav } from "../lib/audioUtils";
 
 function useAudioDownload() {
-  // Ref to store the MediaRecorder instance.
+  // MediaRecorderインスタンスを保存するRef
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  // Ref to collect all recorded Blob chunks.
+  // 録音されたBlobチャンクを収集するRef
   const recordedChunksRef = useRef<Blob[]>([]);
 
   /**
-   * Starts recording by combining the provided remote stream with
-   * the microphone audio.
-   * @param remoteStream - The remote MediaStream (e.g., from the audio element).
+   * 提供されたリモートストリームとマイクオーディオを結合して録音を開始します。
+   * @param remoteStream - リモートMediaStream（例：audio要素から）
    */
   const startRecording = async (remoteStream: MediaStream) => {
     let micStream: MediaStream;
     try {
       micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch (err) {
-      console.error("Error getting microphone stream:", err);
-      // Fallback to an empty MediaStream if microphone access fails.
+      console.error("マイクストリームの取得エラー:", err);
+      // マイクアクセスが失敗した場合は空のMediaStreamにフォールバック
       micStream = new MediaStream();
     }
 
-    // Create an AudioContext to merge the streams.
+    // ストリームをマージするためのAudioContextを作成
     const audioContext = new AudioContext();
     const destination = audioContext.createMediaStreamDestination();
 
-    // Connect the remote audio stream.
+    // リモートオーディオストリームを接続
     try {
       const remoteSource = audioContext.createMediaStreamSource(remoteStream);
       remoteSource.connect(destination);
     } catch (err) {
-      console.error("Error connecting remote stream to the audio context:", err);
+      console.error("リモートストリームのオーディオコンテキストへの接続エラー:", err);
     }
 
-    // Connect the microphone audio stream.
+    // マイクオーディオストリームを接続
     try {
       const micSource = audioContext.createMediaStreamSource(micStream);
       micSource.connect(destination);
     } catch (err) {
-      console.error("Error connecting microphone stream to the audio context:", err);
+      console.error("マイクストリームのオーディオコンテキストへの接続エラー:", err);
     }
 
     const options = { mimeType: "audio/webm" };
@@ -50,20 +49,20 @@ function useAudioDownload() {
           recordedChunksRef.current.push(event.data);
         }
       };
-      // Start recording without a timeslice.
+      // タイムスライスなしで録音を開始
       mediaRecorder.start();
       mediaRecorderRef.current = mediaRecorder;
     } catch (err) {
-      console.error("Error starting MediaRecorder with combined stream:", err);
+      console.error("結合ストリームでのMediaRecorder開始エラー:", err);
     }
   };
 
   /**
-   * Stops the MediaRecorder, if active.
+   * MediaRecorderがアクティブな場合に停止します。
    */
   const stopRecording = () => {
     if (mediaRecorderRef.current) {
-      // Request any final data before stopping.
+      // 停止前に最終データを要求
       mediaRecorderRef.current.requestData();
       mediaRecorderRef.current.stop();
       mediaRecorderRef.current = null;
@@ -71,35 +70,35 @@ function useAudioDownload() {
   };
 
   /**
-   * Initiates download of the recording after converting from WebM to WAV.
-   * If the recorder is still active, we request its latest data before downloading.
+   * WebMからWAVに変換後、録音のダウンロードを開始します。
+   * レコーダーがまだアクティブな場合、ダウンロード前に最新データを要求します。
    */
   const downloadRecording = async () => {
-    // If recording is still active, request the latest chunk.
+    // 録音がまだアクティブな場合、最新チャンクを要求
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
-      // Request the current data.
+      // 現在のデータを要求
       mediaRecorderRef.current.requestData();
-      // Allow a short delay for ondataavailable to fire.
+      // ondataavailableが発火するまで短時間待機
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
     if (recordedChunksRef.current.length === 0) {
-      console.warn("No recorded chunks found to download.");
+      console.warn("ダウンロードする録音チャンクが見つかりません。");
       return;
     }
     
-    // Combine the recorded chunks into a single WebM blob.
+    // 録音チャンクを単一のWebM blobに結合
     const webmBlob = new Blob(recordedChunksRef.current, { type: "audio/webm" });
 
     try {
-      // Convert the WebM blob into a WAV blob.
+      // WebM blobをWAV blobに変換
       const wavBlob = await convertWebMBlobToWav(webmBlob);
       const url = URL.createObjectURL(wavBlob);
 
-      // Generate a formatted datetime string (replace characters not allowed in filenames).
+      // フォーマットされた日時文字列を生成（ファイル名で許可されない文字を置換）
       const now = new Date().toISOString().replace(/[:.]/g, "-");
 
-      // Create an invisible anchor element and trigger the download.
+      // 非表示のアンカー要素を作成してダウンロードをトリガー
       const a = document.createElement("a");
       a.style.display = "none";
       a.href = url;
@@ -108,10 +107,10 @@ function useAudioDownload() {
       a.click();
       document.body.removeChild(a);
 
-      // Clean up the blob URL after a short delay.
+      // 短時間後にblob URLをクリーンアップ
       setTimeout(() => URL.revokeObjectURL(url), 100);
     } catch (err) {
-      console.error("Error converting recording to WAV:", err);
+      console.error("録音のWAV変換エラー:", err);
     }
   };
 

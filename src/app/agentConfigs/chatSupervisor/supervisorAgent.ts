@@ -1,128 +1,105 @@
 import { RealtimeItem, tool } from '@openai/agents/realtime';
 
 
-import {
-  exampleAccountInfo,
-  examplePolicyDocs,
-  exampleStoreLocations,
-} from './sampleData';
+// サンプルデータのインポートは実際のAPI呼び出しを使用するため削除
 
-export const supervisorAgentInstructions = `You are an expert customer service supervisor agent, tasked with providing real-time guidance to a more junior agent that's chatting directly with the customer. You will be given detailed response instructions, tools, and the full conversation history so far, and you should create a correct next message that the junior agent can read directly.
+export const supervisorAgentInstructions = `あなたは、すかいらーく電話注文受付システムのスーパーバイザーエージェントです。顧客情報確認エージェントをサポートし、顧客登録の確認と新規登録を適切に処理する役割を担います。
 
-# Instructions
-- You can provide an answer directly, or call a tool first and then answer the question
-- If you need to call a tool, but don't have the right information, you can tell the junior agent to ask for that information in your message
-- Your message will be read verbatim by the junior agent, so feel free to use it like you would talk directly to the user
-  
-==== Domain-Specific Agent Instructions ====
-You are a helpful customer service agent working for NewTelco, helping a user efficiently fulfill their request while adhering closely to provided guidelines.
+# 基本指示
+- 顧客情報確認エージェントから依頼されたタスクを正確に実行してください
+- 必要に応じてツールを呼び出し、その結果に基づいて適切な応答を作成してください
+- あなたのメッセージは顧客情報確認エージェントによってそのまま読み上げられるため、顧客に直接話しかけるような自然な口調で作成してください
 
-# Instructions
-- Always greet the user at the start of the conversation with "Hi, you've reached NewTelco, how can I help you?"
-- Always call a tool before answering factual questions about the company, its offerings or products, or a user's account. Only use retrieved context and never rely on your own knowledge for any of these questions.
-- Escalate to a human if the user requests.
-- Do not discuss prohibited topics (politics, religion, controversial current events, medical, legal, or financial advice, personal conversations, internal company operations, or criticism of any people or company).
-- Rely on sample phrases whenever appropriate, but never repeat a sample phrase in the same conversation. Feel free to vary the sample phrases to avoid sounding repetitive and make it more appropriate for the user.
-- Always follow the provided output format for new messages, including citations for any factual statements from retrieved policy documents.
+# 利用可能なツール
+- get_customer: 電話番号で顧客情報を検索
+- create_customer: 新規顧客情報を登録  
+- session_finished: 注文受付担当への引き継ぎ
+- add_menu_to_cart: メニューをカートに追加
+- create_cart: 新しいカートを作成
+- get_menus: 利用可能なメニュー一覧を取得
+- search_menu: 商品名でメニューを検索する
+- get_cart_menus: カートに登録されている商品の名称と数量を取得
+- calculate_total_amount: カートの注文の合計金額を計算
+- post_order: お客様の注文を確定する
 
-# Response Instructions
-- Maintain a professional and concise tone in all responses.
-- Respond appropriately given the above guidelines.
-- The message is for a voice conversation, so be very concise, use prose, and never create bulleted lists. Prioritize brevity and clarity over completeness.
-    - Even if you have access to more information, only mention a couple of the most important items and summarize the rest at a high level.
-- Do not speculate or make assumptions about capabilities or information. If a request cannot be fulfilled with available tools or information, politely refuse and offer to escalate to a human representative.
-- If you do not have all required information to call a tool, you MUST ask the user for the missing information in your message. NEVER attempt to call a tool with missing, empty, placeholder, or default values (such as "", "REQUIRED", "null", or similar). Only call a tool when you have all required parameters provided by the user.
-- Do not offer or attempt to fulfill requests for capabilities or services not explicitly supported by your tools or provided information.
-- Only offer to provide more information if you know there is more information available to provide, based on the tools and context you have.
-- When possible, please provide specific numbers or dollar amounts to substantiate your answer.
+# 応対フロー
 
-# Sample Phrases
-## Deflecting a Prohibited Topic
-- "I'm sorry, but I'm unable to discuss that topic. Is there something else I can help you with?"
-- "That's not something I'm able to provide information on, but I'm happy to help with any other questions you may have."
+## 顧客情報検索
+電話番号が提供された場合：
+1. get_customerツールを使用して顧客情報を検索
+2. 登録情報が見つかった場合：「ありがとうございます。ご登録いただいております、[顧客名]様でいらっしゃいますね。」と応答し、session_finishedを呼び出す
+3. 登録情報が見つからない場合：「ありがとうございます。初めてのご利用ですね。恐れ入りますが、ご注文のためにお名前とご住所をお伺いしてもよろしいでしょうか？」
 
-## If you do not have a tool or information to fulfill a request
-- "Sorry, I'm actually not able to do that. Would you like me to transfer you to someone who can help, or help you find your nearest NewTelco store?"
-- "I'm not able to assist with that request. Would you like to speak with a human representative, or would you like help finding your nearest NewTelco store?"
+## 新規顧客登録
+氏名と住所が提供された場合：
+1. 聞き取った情報を復唱確認：「[氏名]様、ご住所は[住所]でよろしいでしょうか？」
+2. 顧客の同意後、create_customerツールを使用して登録
+3. 登録完了後：「ご登録ありがとうございます。それではご注文を承ります。」と伝え、session_finishedを呼び出す
 
-## Before calling a tool
-- "To help you with that, I'll just need to verify your information."
-- "Let me check that for you—one moment, please."
-- "I'll retrieve the latest details for you now."
+## メニュー情報提供
+顧客がメニューについて問い合わせた場合：
 
-## If required information is missing for a tool call
-- "To help you with that, could you please provide your [required info, e.g., zip code/phone number]?"
-- "I'll need your [required info] to proceed. Could you share that with me?"
+### 全メニュー表示の場合：
+1. get_menusツールを使用してメニュー一覧を取得
+2. 「本日ご用意しているメニューをご案内いたします」などの自然な口調で情報提供
 
-# User Message Format
-- Always include your final response to the user.
-- When providing factual information from retrieved context, always include citations immediately after the relevant statement(s). Use the following citation format:
-    - For a single source: [NAME](ID)
-    - For multiple sources: [NAME](ID), [NAME](ID)
-- Only provide information about this company, its policies, its products, or the customer's account, and only if it is based on information provided in context. Do not answer questions outside this scope.
+### 特定商品の検索の場合：
+1. 顧客が具体的な商品名を言った場合は、search_menuツールを使用して該当商品を検索
+2. 検索結果に基づいて適切なメニューを案内
+3. 複数の候補がある場合は選択肢を提示
+4. 見つからない場合は類似商品や人気商品を提案
 
-# Example (tool call)
-- User: Can you tell me about your family plan options?
-- Supervisor Assistant: lookup_policy_document(topic="family plan options")
-- lookup_policy_document(): [
-  {
-    id: "ID-010",
-    name: "Family Plan Policy",
-    topic: "family plan options",
-    content:
-      "The family plan allows up to 5 lines per account. All lines share a single data pool. Each additional line after the first receives a 10% discount. All lines must be on the same account.",
-  },
-  {
-    id: "ID-011",
-    name: "Unlimited Data Policy",
-    topic: "unlimited data",
-    content:
-      "Unlimited data plans provide high-speed data up to 50GB per month. After 50GB, speeds may be reduced during network congestion. All lines on a family plan share the same data pool. Unlimited plans are available for both individual and family accounts.",
-  },
-];
-- Supervisor Assistant:
+## メニュー注文処理
+メニューの注文が確定した場合：
+1. 顧客が商品名を言った場合：
+   - search_menuツールを使用して該当商品を検索
+   - 検索結果から最適な商品を特定
+   - 顧客に確認：「[商品名]でよろしいでしょうか？」
+2. 顧客から数量を確認（明示されていない場合は1個とする）
+3. カートが存在しない場合：create_cartツールを使用してカートを作成（storeNoが必要）
+4. add_menu_to_cartツールを使用してメニューをカートに追加（menuNoとquantityを指定）
+5. 追加完了後：「[メニュー名] [数量]個をカートに追加いたしました。他にご注文はございますか？」と応答
+
+注意：カート作成前に必ずget_customerまたはcreate_customerを実行して顧客情報を確認してください。顧客IDは自動的に保存されます。
+
+## 注文確認と完了処理
+顧客が「注文は以上です」「注文を完了してください」といった意思を示した場合：
+1. get_cart_menusツールを使用してカート内容を取得
+2. 注文内容を顧客に読み上げて確認：「ご注文内容を確認いたします。[商品名]が[数量]個、[商品名]が[数量]個でございます。」
+3. calculate_total_amountツールを使用して合計金額を計算し、顧客に伝える：「合計金額は[金額]円です。」
+4. 顧客の最終確認を取る：「以上でよろしいでしょうか？」
+5. 顧客が同意したら、post_orderツールを使用して注文を確定
+6. 注文完了の挨拶：「ご注文ありがとうございました。準備ができましたらお届けいたします。」
+
+# 応答指示
+- 丁寧で親しみやすい口調を維持してください
+- 音声会話であることを考慮し、簡潔で自然な話し言葉を使用してください
+- 顧客情報の取り扱いには細心の注意を払ってください
+- 必要な情報が不足している場合は、顧客に追加情報を求めてください
+- 最終応答では # Message フォーマットを使用してください
+
+# 応答例
+## 顧客情報が見つかった場合
 # Message
-Yes we do—up to five lines can share data, and you get a 10% discount for each new line [Family Plan Policy](ID-010).
+ありがとうございます。ご登録いただいております、田中太郎様でいらっしゃいますね。
 
-# Example (Refusal for Unsupported Request)
-- User: Can I make a payment over the phone right now?
-- Supervisor Assistant:
+## 新規顧客の場合  
 # Message
-I'm sorry, but I'm not able to process payments over the phone. Would you like me to connect you with a human representative, or help you find your nearest NewTelco store for further assistance?
+ありがとうございます。初めてのご利用ですね。恐れ入りますが、ご注文のためにお名前とご住所をお伺いしてもよろしいでしょうか？
 `;
 
 export const supervisorAgentTools = [
   {
     type: "function",
-    name: "lookupPolicyDocument",
-    description:
-      "Tool to look up internal documents and policies by topic or keyword.",
-    parameters: {
-      type: "object",
-      properties: {
-        topic: {
-          type: "string",
-          description:
-            "The topic or keyword to search for in company policies or documents.",
-        },
-      },
-      required: ["topic"],
-      additionalProperties: false,
-    },
-  },
-  {
-    type: "function",
-    name: "getUserAccountInfo",
-    description:
-      "Tool to get user account information. This only reads user accounts information, and doesn't provide the ability to modify or delete any values.",
+    name: "get_customer",
+    description: "電話番号からユーザー情報を取得する。電話番号は何桁でも許可するようにしてください。",
     parameters: {
       type: "object",
       properties: {
         phone_number: {
           type: "string",
-          description:
-            "Formatted as '(xxx) xxx-xxxx'. MUST be provided by the user, never a null or empty string.",
-        },
+          description: "電話番号"
+        }
       },
       required: ["phone_number"],
       additionalProperties: false,
@@ -130,18 +107,127 @@ export const supervisorAgentTools = [
   },
   {
     type: "function",
-    name: "findNearestStore",
-    description:
-      "Tool to find the nearest store location to a customer, given their zip code.",
+    name: "create_customer",
+    description: "ユーザー情報を登録する。この関数はお客様の電話番号の登録がない場合に使用してください",
     parameters: {
       type: "object",
       properties: {
-        zip_code: {
+        name: {
           type: "string",
-          description: "The customer's 5-digit zip code.",
+          description: "氏名"
         },
+        address: {
+          type: "string",
+          description: "住所"
+        },
+        phone_number: {
+          type: "string",
+          description: "電話番号"
+        }
       },
-      required: ["zip_code"],
+      required: ["name", "address", "phone_number"],
+      additionalProperties: false,
+    },
+  },
+  {
+    type: "function",
+    name: "session_finished",
+    description: "お客様情報が確認できるか、新規の登録が完了した時に呼び出す。",
+    parameters: {
+      type: "object",
+      properties: {},
+      additionalProperties: false,
+    },
+  },
+  {
+    type: "function",
+    name: "add_menu_to_cart",
+    description: "カートオブジェクトにメニューを追加する。カートIDがない場合は自動でカートを作成する",
+    parameters: {
+      type: "object",
+      properties: {
+        menuNo: {
+          type: "integer",
+          description: "メニューNo（32bit符号付き整数）"
+        },
+        quantity: {
+          type: "integer",
+          description: "数量（32bit符号付き整数）"
+        }
+      },
+      required: ["menuNo", "quantity"],
+      additionalProperties: false,
+    },
+  },
+  {
+    type: "function",
+    name: "create_cart",
+    description: "新しいカートを作成する。事前に顧客情報を取得または登録しておく必要がある",
+    parameters: {
+      type: "object",
+      properties: {
+        storeNo: {
+          type: "integer",
+          description: "店舗No（32bit符号付き整数、通常は1を指定）"
+        }
+      },
+      required: ["storeNo"],
+      additionalProperties: false,
+    },
+  },
+  {
+    type: "function",
+    name: "get_menus",
+    description: "利用可能なメニュー一覧を取得する",
+    parameters: {
+      type: "object",
+      properties: {},
+      additionalProperties: false,
+    },
+  },
+  {
+    type: "function",
+    name: "search_menu",
+    description: "商品名でメニューを検索する。顧客が注文したい商品名を指定して該当するメニューを探す",
+    parameters: {
+      type: "object",
+      properties: {
+        name: {
+          type: "string",
+          description: "検索したい商品名"
+        }
+      },
+      required: ["name"],
+      additionalProperties: false,
+    },
+  },
+  {
+    type: "function",
+    name: "get_cart_menus",
+    description: "カートに登録されている商品の名称と数量を取得する",
+    parameters: {
+      type: "object",
+      properties: {},
+      additionalProperties: false,
+    },
+  },
+  {
+    type: "function",
+    name: "calculate_total_amount",
+    description: "カートの注文の合計金額を計算する",
+    parameters: {
+      type: "object",
+      properties: {},
+      additionalProperties: false,
+    },
+  },
+  {
+    type: "function",
+    name: "post_order",
+    description: "お客様の注文を全て聞いたら、カートの注文を確定する",
+    parameters: {
+      type: "object",
+      properties: {},
       additionalProperties: false,
     },
   },
@@ -153,7 +239,7 @@ async function fetchResponsesMessage(body: any) {
     headers: {
       'Content-Type': 'application/json',
     },
-    // Preserve the previous behaviour of forcing sequential tool calls.
+    // 順次ツール呼び出しを強制する従来の動作を保持
     body: JSON.stringify({ ...body, parallel_tool_calls: false }),
   });
 
@@ -166,22 +252,11 @@ async function fetchResponsesMessage(body: any) {
   return completion;
 }
 
-function getToolResponse(fName: string) {
-  switch (fName) {
-    case "getUserAccountInfo":
-      return exampleAccountInfo;
-    case "lookupPolicyDocument":
-      return examplePolicyDocs;
-    case "findNearestStore":
-      return exampleStoreLocations;
-    default:
-      return { result: true };
-  }
-}
+// 関数呼び出しは現在 /api/responses ルートでサーバーサイドで処理される
 
 /**
- * Iteratively handles function calls returned by the Responses API until the
- * supervisor produces a final textual answer. Returns that answer as a string.
+ * Responses APIから返された関数呼び出しを反復的に処理し、
+ * スーパーバイザーが最終的なテキスト回答を生成するまで続ける。その回答を文字列として返す。
  */
 async function handleToolCalls(
   body: any,
@@ -197,11 +272,11 @@ async function handleToolCalls(
 
     const outputItems: any[] = currentResponse.output ?? [];
 
-    // Gather all function calls in the output.
+    // 出力内のすべての関数呼び出しを収集
     const functionCalls = outputItems.filter((item) => item.type === 'function_call');
 
     if (functionCalls.length === 0) {
-      // No more function calls – build and return the assistant's final message.
+      // これ以上の関数呼び出しなし - アシスタントの最終メッセージを構築して返す
       const assistantMessages = outputItems.filter((item) => item.type === 'message');
 
       const finalText = assistantMessages
@@ -217,38 +292,25 @@ async function handleToolCalls(
       return finalText;
     }
 
-    // For each function call returned by the supervisor model, execute it locally and append its
-    // output to the request body as a `function_call_output` item.
+    // リクエストボディに関数呼び出しを追加 - サーバーサイドで処理される
     for (const toolCall of functionCalls) {
       const fName = toolCall.name;
       const args = JSON.parse(toolCall.arguments || '{}');
-      const toolRes = getToolResponse(fName);
 
-      // Since we're using a local function, we don't need to add our own breadcrumbs
       if (addBreadcrumb) {
         addBreadcrumb(`[supervisorAgent] function call: ${fName}`, args);
       }
-      if (addBreadcrumb) {
-        addBreadcrumb(`[supervisorAgent] function call result: ${fName}`, toolRes);
-      }
 
-      // Add function call and result to the request body to send back to realtime
-      body.input.push(
-        {
-          type: 'function_call',
-          call_id: toolCall.call_id,
-          name: toolCall.name,
-          arguments: toolCall.arguments,
-        },
-        {
-          type: 'function_call_output',
-          call_id: toolCall.call_id,
-          output: JSON.stringify(toolRes),
-        },
-      );
+      // リクエストボディに関数呼び出しを追加 - 実行はサーバーサイドで行われる
+      body.input.push({
+        type: 'function_call',
+        call_id: toolCall.call_id,
+        name: toolCall.name,
+        arguments: toolCall.arguments,
+      });
     }
 
-    // Make the follow-up request including the tool outputs.
+    // ツール出力を含むフォローアップリクエストを作成
     currentResponse = await fetchResponsesMessage(body);
   }
 }
@@ -256,14 +318,14 @@ async function handleToolCalls(
 export const getNextResponseFromSupervisor = tool({
   name: 'getNextResponseFromSupervisor',
   description:
-    'Determines the next response whenever the agent faces a non-trivial decision, produced by a highly intelligent supervisor agent. Returns a message describing what to do next.',
+    'エージェントが重要な決定に直面した際の次の応答を決定する。高度に知的なスーパーバイザーエージェントによって生成される。次に何をすべきかを説明するメッセージを返す。',
   parameters: {
     type: 'object',
     properties: {
       relevantContextFromLastUserMessage: {
         type: 'string',
         description:
-          'Key information from the user described in their most recent message. This is critical to provide as the supervisor agent with full context as the last message might not be available. Okay to omit if the user message didn\'t add any new information.',
+          'ユーザーの最新メッセージで説明された重要な情報。最後のメッセージが利用できない可能性があるため、スーパーバイザーエージェントに完全なコンテキストを提供することが重要。ユーザーメッセージが新しい情報を追加していない場合は省略可能。',
       },
     },
     required: ['relevantContextFromLastUserMessage'],
