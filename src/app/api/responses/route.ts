@@ -368,7 +368,7 @@ async function calculateTotalAmount() {
       
       // 合計金額を計算
       const totalAmount = data.reduce((sum: number, menu: any) => {
-        return sum + (menu.price || 0);
+        return sum + (menu.price *menu.quantity || 0);
       }, 0);
       
       return { 
